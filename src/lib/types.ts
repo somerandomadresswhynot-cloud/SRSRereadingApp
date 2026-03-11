@@ -41,6 +41,17 @@ export interface ReviewEvent {
   writtenRecall: string;
   previousDueAt: string | null;
   nextDueAt: string;
+  durationMinutes?: number;
+}
+
+export interface TimerEvent {
+  id: string;
+  unitId: string;
+  startedAt: string;
+  endedAt: string;
+  minutesSpent: number;
+  createdAt: string;
+  note?: string;
 }
 
 export interface Settings {
