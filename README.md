@@ -18,7 +18,13 @@ Local-first chapter-based SRS app for reviewing source units (chapter/section le
   - Markdown/TXT via embedded reading panel.
 - Written recall is saved with each review event.
 
-## Local setup
+## One-command run
+```bash
+./run-local.sh
+```
+This script installs dependencies, runs a build sanity check, and starts the dev server.
+
+## Manual local setup
 ```bash
 npm install
 npm run dev
