@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { toDateOnly } from './date';
 import { db, ensureSeeded } from './db';
+import { defaultKpiTiles } from './layout';
 import { scheduleNext } from './scheduler';
-import type { Rating, ReviewEvent, Settings, Source, TimerEvent, UnitNode } from './types';
+import type { DashboardTileLayout, Rating, ReviewEvent, Settings, Source, TimerEvent, UnitNode } from './types';
 
 interface AppState {
   sources: Source[];
@@ -27,7 +28,20 @@ const fallbackSettings: Settings = {
   defaultMinutesPerPage: 1.7,
   manualReviewsAffectScheduling: true,
   allowNewItemsWhenLoadHigh: false,
-  density: 'comfortable'
+  density: 'comfortable',
+  kpiTiles: defaultKpiTiles
+};
+
+const normalizeSettings = (incoming?: Partial<Settings> | null): Settings => ({
+  ...fallbackSettings,
+  ...incoming,
+  kpiTiles: incoming?.kpiTiles?.length ? incoming.kpiTiles : defaultKpiTiles
+});
+
+const extToType = (name: string): Source['type'] => {
+  if (name.toLowerCase().endsWith('.pdf')) return 'pdf';
+  if (name.toLowerCase().endsWith('.md') || name.toLowerCase().endsWith('.markdown')) return 'markdown';
+  return 'text';
 };
 
 const extToType = (name: string): Source['type'] => {
@@ -56,7 +70,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setUnits(u);
     setReviews(r);
     setTimers(t);
-    if (st) setSettings(st);
+    setSettings(normalizeSettings(st));
   };
 
   useEffect(() => { void refresh(); }, []);
@@ -152,8 +166,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateSettings = async (nextSettings: Settings) => {
-    await db.settings.put(nextSettings, 'main');
-    setSettings(nextSettings);
+    const normalized = normalizeSettings(nextSettings);
+    await db.settings.put(normalized, 'main');
+    setSettings(normalized);
   };
 
   const value = useMemo(() => ({ sources, units, reviews, timers, settings, refresh, reviewUnit, addSourceFromFile, recordTimerEvent, updateSettings }), [sources, units, reviews, timers, settings]);

@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import { defaultKpiTiles } from './layout';
 import type { ReviewEvent, Settings, Source, TimerEvent, UnitNode } from './types';
 
 export class SrsDb extends Dexie {
@@ -43,7 +44,8 @@ const defaultSettings: Settings = {
   defaultMinutesPerPage: 1.7,
   manualReviewsAffectScheduling: true,
   allowNewItemsWhenLoadHigh: false,
-  density: 'comfortable'
+  density: 'comfortable',
+  kpiTiles: defaultKpiTiles
 };
 
 export async function ensureSeeded() {

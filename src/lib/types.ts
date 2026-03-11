@@ -54,6 +54,16 @@ export interface TimerEvent {
   note?: string;
 }
 
+export interface DashboardTileLayout {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  hidden?: boolean;
+  collapsed?: boolean;
+}
+
 export interface Settings {
   targetReviewMinutesPerDay: number;
   targetLearningMinutesPerDay: number;
@@ -63,4 +73,5 @@ export interface Settings {
   manualReviewsAffectScheduling: boolean;
   allowNewItemsWhenLoadHigh: boolean;
   density: 'compact' | 'comfortable';
+  kpiTiles: DashboardTileLayout[];
 }

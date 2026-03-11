@@ -27,8 +27,26 @@ textarea,input,select{ width:100%; margin-top:6px; margin-bottom:10px; backgroun
 .dropzone { border-style: dashed; }
 .dropzone-active { border-color: #6c8ff8; background: #131f3a; }
 .section-head { align-items: center; }
-.kpi-tile { width: fit-content; min-width: 60%; }
-.kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(140px,1fr));grid-template-rows:repeat(3,minmax(110px,auto));gap:10px;min-height:360px;}
-.kpi-card{min-width:unset;display:flex;flex-direction:column;justify-content:space-between;}
 
-@media (max-width: 900px){ .review-layout{grid-template-columns:1fr;} .stats-row{grid-template-columns:1fr 1fr;} .kpi-grid{grid-template-columns:1fr 1fr;grid-template-rows:none;min-height:0;} }
+.tile-grid-editor { position: relative; width: 100%; margin-top: 8px; }
+.tile-grid-item {
+  position: absolute;
+  background:#0d1321;
+  border:1px solid #2e3c5b;
+  border-radius:12px;
+  overflow: hidden;
+  transition: left 180ms ease, top 180ms ease, width 180ms ease, height 180ms ease, box-shadow 180ms ease;
+}
+.tile-grid-item.is-dragging { opacity: 0.75; box-shadow: 0 0 0 2px #6c8ff8; z-index: 5; transition: none; }
+.tile-head { display:flex; justify-content:flex-end; padding: 4px; }
+.tile-grip { cursor: grab; user-select: none; border: none; background: transparent; color: #94a3c9; font-size: 16px; line-height: 1; padding: 2px 6px; }
+.tile-grip:active { cursor: grabbing; }
+.tile-content { padding: 6px 10px 10px; height: calc(100% - 24px); }
+.kpi-card-body { height: 100%; display:flex; flex-direction:column; justify-content:space-between; }
+.resize-handle { position:absolute; opacity:0; transition:opacity 120ms ease; }
+.tile-grid-item:hover .resize-handle, .tile-grid-item:focus-within .resize-handle { opacity:1; }
+.resize-e { right:0; top:25%; width:8px; height:50%; cursor:e-resize; }
+.resize-s { bottom:0; left:25%; height:8px; width:50%; cursor:s-resize; }
+.resize-se { right:0; bottom:0; width:14px; height:14px; cursor:se-resize; }
+
+@media (max-width: 900px){ .review-layout{grid-template-columns:1fr;} .stats-row{grid-template-columns:1fr 1fr;} }

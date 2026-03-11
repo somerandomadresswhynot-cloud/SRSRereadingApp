@@ -1,9 +1,23 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ReviewPanel } from '../components/ReviewPanel';
+import { TileGridEditor } from '../components/TileGridEditor';
 import { formatDate } from '../lib/date';
 import { buildProjection, dueState, pickRecommendation } from '../lib/scheduler';
+import { defaultKpiTiles } from '../lib/layout';
 import { useAppState } from '../lib/store';
-import type { UnitNode } from '../lib/types';
+import type { DashboardTileLayout, UnitNode } from '../lib/types';
+
+type MetricKey = 'learningToday' | 'reviewToday' | 'avgReviewMinutes' | 'dueDistribution';
+
+const centerFallbackId: MetricKey = 'learningToday';
+const ensureCenterOccupied = (tiles: DashboardTileLayout[]) => {
+  const centerX = 2;
+  const centerY = 1;
+  const visible = tiles.filter((tile) => !tile.hidden);
+  const centerTile = visible.find((tile) => centerX >= tile.x && centerX < tile.x + tile.w && centerY >= tile.y && centerY < tile.y + tile.h);
+  if (centerTile) return tiles;
+  return tiles.map((tile) => tile.id === centerFallbackId ? { ...tile, hidden: false, x: 1, y: 1 } : tile);
+};
 
 type MetricKey = 'learningToday' | 'reviewToday' | 'avgReviewMinutes' | 'dueDistribution';
 type Position = { row: number; col: number };
@@ -12,21 +26,14 @@ const center: Position = { row: 1, col: 1 };
 const samePosition = (a: Position, b: Position) => a.row === b.row && a.col === b.col;
 
 export function QueuePage() {
-  const { settings, units, sources, reviews, timers, reviewUnit } = useAppState();
+  const { settings, units, sources, reviews, timers, reviewUnit, updateSettings } = useAppState();
   const [active, setActive] = useState<UnitNode | null>(null);
   const [kpiScale, setKpiScale] = useState(1);
-  const [enabledMetrics, setEnabledMetrics] = useState<Record<MetricKey, boolean>>({
-    learningToday: true,
-    reviewToday: true,
-    avgReviewMinutes: true,
-    dueDistribution: true
-  });
-  const [metricLayout, setMetricLayout] = useState<Record<MetricKey, Position>>({
-    learningToday: { row: 1, col: 1 },
-    reviewToday: { row: 0, col: 1 },
-    avgReviewMinutes: { row: 1, col: 2 },
-    dueDistribution: { row: 2, col: 1 }
-  });
+  const [tiles, setTiles] = useState<DashboardTileLayout[]>(ensureCenterOccupied(settings.kpiTiles));
+
+  useEffect(() => {
+    setTiles(ensureCenterOccupied(settings.kpiTiles));
+  }, [settings.kpiTiles]);
 
   const recommendation = useMemo(() => pickRecommendation(units, settings), [units, settings]);
   const projection = useMemo(() => buildProjection(units, settings), [units, settings]);
@@ -50,29 +57,10 @@ export function QueuePage() {
     dueDistribution: { label: 'Due distribution', content: `overdue ${dueDistribution.overdue} · due ${dueDistribution.due} · new ${dueDistribution.new}` }
   };
 
-  const moveMetric = (key: MetricKey, deltaRow: number, deltaCol: number) => {
-    const current = metricLayout[key];
-    const next = { row: current.row + deltaRow, col: current.col + deltaCol };
-    if (next.row < 0 || next.row > 2 || next.col < 0 || next.col > 2) return;
-
-    const swappedKey = (Object.keys(metricLayout) as MetricKey[]).find((candidate) => candidate !== key && samePosition(metricLayout[candidate], next));
-    const centerMetric = (Object.keys(metricLayout) as MetricKey[]).find((candidate) => samePosition(metricLayout[candidate], center));
-
-    setMetricLayout((prev) => {
-      const updated = { ...prev, [key]: next };
-      if (swappedKey) updated[swappedKey] = current;
-
-      const updatedCenterMetric = (Object.keys(updated) as MetricKey[]).find((candidate) => samePosition(updated[candidate], center));
-      if (updatedCenterMetric) return updated;
-
-      const fallbackCenterMetric = centerMetric ?? key;
-      const displaced = (Object.keys(updated) as MetricKey[]).find((candidate) => candidate !== fallbackCenterMetric && samePosition(updated[candidate], center));
-      updated[fallbackCenterMetric] = center;
-      if (displaced && displaced !== fallbackCenterMetric) {
-        updated[displaced] = current;
-      }
-      return updated;
-    });
+  const persistTiles = async (nextTiles: DashboardTileLayout[]) => {
+    const safeTiles = ensureCenterOccupied(nextTiles);
+    setTiles(safeTiles);
+    await updateSettings({ ...settings, kpiTiles: safeTiles });
   };
 
   return (
@@ -96,32 +84,32 @@ export function QueuePage() {
         <div><h4>New items</h4><p>{recommendation.allowNew ? 'Allowed' : 'Held back'}</p></div>
       </section>
 
-      <section className="card kpi-tile" style={{ transform: `scale(${kpiScale})`, transformOrigin: 'top left' }}>
+      <section className="card" style={{ transform: `scale(${kpiScale})`, transformOrigin: 'top left' }}>
         <div className="row spread"><h3>Basic KPIs</h3><label>Scale<input type="range" min="0.8" max="1.4" step="0.1" value={kpiScale} onChange={(e) => setKpiScale(Number(e.target.value))} /></label></div>
-        <div className="row">{(Object.keys(enabledMetrics) as MetricKey[]).map((key) => <label key={key}><input type="checkbox" checked={enabledMetrics[key]} onChange={(e) => setEnabledMetrics((m) => ({ ...m, [key]: e.target.checked }))} /> {key}</label>)}</div>
-        <p className="muted">Tiles are reorderable in both directions. Center is always occupied.</p>
-        <div className="kpi-grid">
-          {(Object.keys(metricDefinitions) as MetricKey[]).filter((key) => enabledMetrics[key]).map((key) => {
-            const metric = metricDefinitions[key];
-            const pos = metricLayout[key];
-            return (
-              <article
-                key={key}
-                className="mini-card kpi-card"
-                style={{ gridRow: pos.row + 1, gridColumn: pos.col + 1 }}
-              >
-                <h4>{metric.label}</h4>
-                <p>{metric.content}</p>
-                <div className="row">
-                  <button className="ghost" onClick={() => moveMetric(key, -1, 0)}>↑</button>
-                  <button className="ghost" onClick={() => moveMetric(key, 1, 0)}>↓</button>
-                  <button className="ghost" onClick={() => moveMetric(key, 0, -1)}>←</button>
-                  <button className="ghost" onClick={() => moveMetric(key, 0, 1)}>→</button>
-                </div>
-              </article>
-            );
+        <p className="muted">Drag tiles by handle, resize by edges/corner. Movement snaps to grid with threshold to avoid jitter.</p>
+        <div className="row">
+          {(Object.keys(metricDefinitions) as MetricKey[]).map((id) => {
+            const tile = tiles.find((t) => t.id === id) ?? defaultKpiTiles.find((t: DashboardTileLayout) => t.id === id)!;
+            return <label key={id}><input type="checkbox" checked={!tile.hidden} onChange={(e) => void persistTiles(tiles.map((t) => t.id === id ? { ...t, hidden: !e.target.checked } : t))} /> {id}</label>;
           })}
         </div>
+
+        <TileGridEditor
+          tiles={tiles}
+          onChange={setTiles}
+          onCommit={(next) => void persistTiles(next)}
+          ensureCenterOccupied={ensureCenterOccupied}
+          renderTile={(tile) => {
+            const id = tile.id as MetricKey;
+            const def = metricDefinitions[id];
+            return (
+              <article className="kpi-card-body">
+                <div className="row spread"><h4>{def.label}</h4><button className="ghost" onClick={() => void persistTiles(tiles.map((t) => t.id === id ? { ...t, collapsed: !t.collapsed } : t))}>{tile.collapsed ? 'Expand' : 'Collapse'}</button></div>
+                {!tile.collapsed && <p>{def.content}</p>}
+              </article>
+            );
+          }}
+        />
       </section>
 
       <section className="card">

@@ -41,3 +41,10 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+
+## Dashboard layout editing
+- KPI tiles use a reusable grid editor with drag handle (`⋮⋮`) for movement and edge/corner handles for resize.
+- Drag/resize snaps to grid units; drag starts after a short movement threshold to reduce accidental jitter.
+- Collision resolution is push-down + vertical compaction: resized/moved tiles push overlapping neighbors, then gaps are packed upward.
+- Layout state is persisted in Settings (`kpiTiles`) including position, size, and hidden/collapsed flags.
