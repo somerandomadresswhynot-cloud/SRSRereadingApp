@@ -4,6 +4,7 @@ import { TileGridEditor } from '../components/TileGridEditor';
 import { defaultKpiTiles, defaultQueueTiles } from '../lib/layout';
 import { formatDate } from '../lib/date';
 import { buildProjection, dueState, pickRecommendation } from '../lib/scheduler';
+import { defaultKpiTiles } from '../lib/layout';
 import { useAppState } from '../lib/store';
 import type { DashboardTileLayout, UnitNode } from '../lib/types';
 
