@@ -19,6 +19,12 @@ const ensureCenterOccupied = (tiles: DashboardTileLayout[]) => {
   return tiles.map((tile) => tile.id === centerFallbackId ? { ...tile, hidden: false, x: 1, y: 1 } : tile);
 };
 
+type MetricKey = 'learningToday' | 'reviewToday' | 'avgReviewMinutes' | 'dueDistribution';
+type Position = { row: number; col: number };
+
+const center: Position = { row: 1, col: 1 };
+const samePosition = (a: Position, b: Position) => a.row === b.row && a.col === b.col;
+
 export function QueuePage() {
   const { settings, units, sources, reviews, timers, reviewUnit, updateSettings } = useAppState();
   const [active, setActive] = useState<UnitNode | null>(null);

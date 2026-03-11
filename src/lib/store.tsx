@@ -44,6 +44,12 @@ const extToType = (name: string): Source['type'] => {
   return 'text';
 };
 
+const extToType = (name: string): Source['type'] => {
+  if (name.toLowerCase().endsWith('.pdf')) return 'pdf';
+  if (name.toLowerCase().endsWith('.md') || name.toLowerCase().endsWith('.markdown')) return 'markdown';
+  return 'text';
+};
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [sources, setSources] = useState<Source[]>([]);
   const [units, setUnits] = useState<UnitNode[]>([]);
