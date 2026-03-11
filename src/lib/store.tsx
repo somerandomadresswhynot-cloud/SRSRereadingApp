@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { toDateOnly } from './date';
 import { db, ensureSeeded } from './db';
-import { defaultKpiTiles } from './layout';
+import { defaultKpiTiles, defaultQueueTiles } from './layout';
 import { scheduleNext } from './scheduler';
 import type { DashboardTileLayout, Rating, ReviewEvent, Settings, Source, TimerEvent, UnitNode } from './types';
 
@@ -29,20 +29,16 @@ const fallbackSettings: Settings = {
   manualReviewsAffectScheduling: true,
   allowNewItemsWhenLoadHigh: false,
   density: 'comfortable',
-  kpiTiles: defaultKpiTiles
+  kpiTiles: defaultKpiTiles,
+  queueTiles: defaultQueueTiles
 };
 
 const normalizeSettings = (incoming?: Partial<Settings> | null): Settings => ({
   ...fallbackSettings,
   ...incoming,
-  kpiTiles: incoming?.kpiTiles?.length ? incoming.kpiTiles : defaultKpiTiles
+  kpiTiles: incoming?.kpiTiles?.length ? incoming.kpiTiles : defaultKpiTiles,
+  queueTiles: incoming?.queueTiles?.length ? incoming.queueTiles : defaultQueueTiles
 });
-
-const extToType = (name: string): Source['type'] => {
-  if (name.toLowerCase().endsWith('.pdf')) return 'pdf';
-  if (name.toLowerCase().endsWith('.md') || name.toLowerCase().endsWith('.markdown')) return 'markdown';
-  return 'text';
-};
 
 const extToType = (name: string): Source['type'] => {
   if (name.toLowerCase().endsWith('.pdf')) return 'pdf';

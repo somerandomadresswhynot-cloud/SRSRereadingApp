@@ -16,7 +16,7 @@ Local-first chapter-based SRS app for reviewing imported source units with an em
   - Scalable embedded reader for PDF and text formats.
   - Reorderable/scalable sections (reader, recall, timer).
   - Interactive distraction-free timer with manual review entry.
-- Queue KPI tile with selectable metrics and independent scaling.
+- Queue page uses dashboard tiles for all major sections (recommended unit, summary, KPIs, projected load) with drag+resize layout editing.
 - Date-only timestamps for due/review/timer records.
 
 ## One-command run
@@ -44,7 +44,9 @@ npm run preview
 
 
 ## Dashboard layout editing
-- KPI tiles use a reusable grid editor with drag handle (`⋮⋮`) for movement and edge/corner handles for resize.
-- Drag/resize snaps to grid units; drag starts after a short movement threshold to reduce accidental jitter.
-- Collision resolution is push-down + vertical compaction: resized/moved tiles push overlapping neighbors, then gaps are packed upward.
-- Layout state is persisted in Settings (`kpiTiles`) including position, size, and hidden/collapsed flags.
+- Queue uses a reusable grid editor where each visible section is a tile (recommended unit, summary, KPIs, projected load).
+- KPI cards inside the KPI section also use the same editor component, so the system is reusable for nested/future dashboard sections.
+- Drag starts from the grip handle (`⋮⋮`) and resize uses edge/corner handles.
+- Drag/resize snaps to grid units; drag starts only after a short movement threshold to reduce jitter.
+- Collision resolution is push-down + vertical compaction: moved/resized tiles push overlaps, then gaps are packed upward.
+- Layout state is persisted in Settings (`queueTiles` and `kpiTiles`) including position, size, hidden/collapsed flags.

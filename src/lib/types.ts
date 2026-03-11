@@ -74,4 +74,5 @@ export interface Settings {
   allowNewItemsWhenLoadHigh: boolean;
   density: 'compact' | 'comfortable';
   kpiTiles: DashboardTileLayout[];
+  queueTiles: DashboardTileLayout[];
 }
