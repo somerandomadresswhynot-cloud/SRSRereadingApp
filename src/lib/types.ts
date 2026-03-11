@@ -41,6 +41,27 @@ export interface ReviewEvent {
   writtenRecall: string;
   previousDueAt: string | null;
   nextDueAt: string;
+  durationMinutes?: number;
+}
+
+export interface TimerEvent {
+  id: string;
+  unitId: string;
+  startedAt: string;
+  endedAt: string;
+  minutesSpent: number;
+  createdAt: string;
+  note?: string;
+}
+
+export interface DashboardTileLayout {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  hidden?: boolean;
+  collapsed?: boolean;
 }
 
 export interface Settings {
@@ -52,4 +73,5 @@ export interface Settings {
   manualReviewsAffectScheduling: boolean;
   allowNewItemsWhenLoadHigh: boolean;
   density: 'compact' | 'comfortable';
+  kpiTiles: DashboardTileLayout[];
 }

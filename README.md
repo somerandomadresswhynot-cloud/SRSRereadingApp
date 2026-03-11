@@ -1,6 +1,6 @@
 # SRS Rereading App
 
-Local-first chapter-based SRS app for reviewing source units (chapter/section leaves) with an embedded viewer and persistent scheduling.
+Local-first chapter-based SRS app for reviewing imported source units with an embedded viewer and persistent scheduling.
 
 ## Stack
 - React + TypeScript + Vite
@@ -8,15 +8,16 @@ Local-first chapter-based SRS app for reviewing source units (chapter/section le
 
 ## Features
 - Exactly three top-level tabs: **Queue**, **Sources**, **Settings**.
+- Drag-and-drop/manual file import for PDF/Markdown/TXT.
 - Tree-first source browsing with collapsible hierarchy in source views.
 - Persistent scheduler state (`dueAt`, `stability`, `difficulty`, `retrievability`, counts).
 - Review ratings: **Easy**, **With Effort**, **Hard**, **Again**.
-- Queue recommendation with explanation and alternatives.
-- 14-day projected load (units, minutes, pages).
-- Embedded in-app unit viewer:
-  - PDF via embedded iframe (`#page=` deep link)
-  - Markdown/TXT via embedded reading panel.
-- Written recall is saved with each review event.
+- Review workspace with:
+  - Scalable embedded reader for PDF and text formats.
+  - Reorderable/scalable sections (reader, recall, timer).
+  - Interactive distraction-free timer with manual review entry.
+- Queue KPI tile with selectable metrics and independent scaling.
+- Date-only timestamps for due/review/timer records.
 
 ## One-command run
 ### macOS / Linux
@@ -29,14 +30,11 @@ Local-first chapter-based SRS app for reviewing source units (chapter/section le
 run-local.bat
 ```
 
-These scripts install dependencies, run a build sanity check, and start the dev server.
-
 ## Manual local setup
 ```bash
 npm install
 npm run dev
 ```
-Open the URL printed by Vite.
 
 ## Build
 ```bash
@@ -44,16 +42,9 @@ npm run build
 npm run preview
 ```
 
-## Data model (local IndexedDB)
-- `Source`: id, title, type, originPath, parse status, timestamps, priority.
-- `UnitNode`: source tree nodes with leaf review units and scheduling fields.
-- `ReviewEvent`: timestamped rating events with written recall + due transition.
-- `Settings`: scheduling budgets, behavior toggles, display density.
 
-## Seed data
-On first launch, the app seeds:
-- 3 sources
-- hierarchical trees
-- 12 leaf units
-- due + overdue + new mix
-- review history entries with sample recall notes.
+## Dashboard layout editing
+- KPI tiles use a reusable grid editor with drag handle (`⋮⋮`) for movement and edge/corner handles for resize.
+- Drag/resize snaps to grid units; drag starts after a short movement threshold to reduce accidental jitter.
+- Collision resolution is push-down + vertical compaction: resized/moved tiles push overlapping neighbors, then gaps are packed upward.
+- Layout state is persisted in Settings (`kpiTiles`) including position, size, and hidden/collapsed flags.
