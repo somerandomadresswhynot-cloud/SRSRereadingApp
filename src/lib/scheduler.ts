@@ -1,3 +1,4 @@
+import { toDateOnly } from './date';
 import type { Rating, Settings, UnitNode } from './types';
 
 const msDay = 86400000;
@@ -28,8 +29,8 @@ export function scheduleNext(unit: UnitNode, rating: Rating, at = new Date()) {
   const intervalDays = rating === 'Again' ? 1 : Math.max(1, Math.round(newStability * (rating === 'Easy' ? 1.4 : 1)));
 
   return {
-    dueAt: new Date(at.getTime() + intervalDays * msDay).toISOString(),
-    lastReviewedAt: at.toISOString(),
+    dueAt: toDateOnly(new Date(at.getTime() + intervalDays * msDay)),
+    lastReviewedAt: toDateOnly(at),
     reviewCount: unit.reviewCount + 1,
     lapseCount: unit.lapseCount + (rating === 'Again' ? 1 : 0),
     difficulty: newDifficulty,
