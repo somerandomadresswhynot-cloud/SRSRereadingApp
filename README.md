@@ -19,10 +19,17 @@ Local-first chapter-based SRS app for reviewing source units (chapter/section le
 - Written recall is saved with each review event.
 
 ## One-command run
+### macOS / Linux
 ```bash
 ./run-local.sh
 ```
-This script installs dependencies, runs a build sanity check, and starts the dev server.
+
+### Windows (PowerShell / CMD)
+```bat
+run-local.bat
+```
+
+These scripts install dependencies, run a build sanity check, and start the dev server.
 
 ## Manual local setup
 ```bash
